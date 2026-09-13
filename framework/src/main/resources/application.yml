@@ -1,0 +1,10 @@
+spring:
+  profiles:
+    active: dev
+  application:
+    name: mbrs-generator-app
+
+# Togglable Security feature
+mbrs:
+  security:
+    enabled: false
