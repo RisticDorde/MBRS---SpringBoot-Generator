@@ -3,8 +3,8 @@
 Ovaj dokument definiše tačne verzije i tehnologije koje će naš generator praviti (Spring Boot stack). Odlučeno je da se koristi moderna, ali stabilna verzija alata.
 
 ## Core
-- **Java**: 21 (LTS)
-- **Spring Boot**: 3.1.5 (ili novija stabilna 3.x verzija)
+- **Java**: 17 (LTS)
+- **Spring Boot**: 3.2.5 (ili novija stabilna 3.x verzija)
 - **Build Tool**: Maven
 
 ## Baze podataka & JPA
