@@ -1,0 +1,25 @@
+[module dto('http://www.eclipse.org/uml2/5.0.0/UML')]
+[import utils::umlHelpers /]
+
+[template public generateDto(c : Class)]
+[file ('src/main/java/com/mbrs/framework/dto/' + c.name.toUpperFirst() + 'Dto.java', false, 'UTF-8')]
+package com.mbrs.framework.dto;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class [c.name.toUpperFirst()/]Dto {
+    
+    private Long id;
+
+[for (p : Property | c.ownedAttribute)]
+    [if (not p.type.oclIsUndefined())]
+    private [p.type.name/] [p.name/];
+    [/if]
+[/for]
+
+}
+[/file]
+[/template]

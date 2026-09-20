@@ -1,0 +1,23 @@
+[module mapper('http://www.eclipse.org/uml2/5.0.0/UML')]
+[import utils::umlHelpers /]
+
+[template public generateMapper(c : Class)]
+[file ('src/main/java/com/mbrs/framework/mapper/' + c.name.toUpperFirst() + 'Mapper.java', false, 'UTF-8')]
+package com.mbrs.framework.mapper;
+
+import com.mbrs.framework.dto.[c.name.toUpperFirst()/]Dto;
+import com.mbrs.framework.entity.[c.name.toUpperFirst()/];
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
+
+@Mapper(componentModel = "spring")
+public interface [c.name.toUpperFirst()/]Mapper {
+
+    [c.name.toUpperFirst()/]Dto toDto([c.name.toUpperFirst()/] entity);
+    
+    [c.name.toUpperFirst()/] toEntity([c.name.toUpperFirst()/]Dto dto);
+    
+    void updateEntityFromDto([c.name.toUpperFirst()/]Dto dto, @MappingTarget [c.name.toUpperFirst()/] entity);
+}
+[/file]
+[/template]

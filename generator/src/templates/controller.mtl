@@ -1,0 +1,53 @@
+[module controller('http://www.eclipse.org/uml2/5.0.0/UML')]
+[import utils::umlHelpers /]
+
+[template public generateController(c : Class)]
+[file ('src/main/java/com/mbrs/framework/controller/' + c.name.toUpperFirst() + 'Controller.java', false, 'UTF-8')]
+package com.mbrs.framework.controller;
+
+import com.mbrs.framework.dto.[c.name.toUpperFirst()/]Dto;
+import com.mbrs.framework.service.[c.name.toUpperFirst()/]Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/[c.name.toLower()/]s")
+public class [c.name.toUpperFirst()/]Controller {
+
+    private final [c.name.toUpperFirst()/]Service service;
+
+    public [c.name.toUpperFirst()/]Controller([c.name.toUpperFirst()/]Service service) {
+        this.service = service;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<[c.name.toUpperFirst()/]Dto>> getAll() {
+        return ResponseEntity.ok(service.findAll());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<[c.name.toUpperFirst()/]Dto> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findById(id));
+    }
+
+    @PostMapping
+    public ResponseEntity<[c.name.toUpperFirst()/]Dto> create(@RequestBody [c.name.toUpperFirst()/]Dto dto) {
+        return new ResponseEntity<>(service.create(dto), HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<[c.name.toUpperFirst()/]Dto> update(@PathVariable Long id, @RequestBody [c.name.toUpperFirst()/]Dto dto) {
+        return ResponseEntity.ok(service.update(id, dto));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+}
+[/file]
+[/template]

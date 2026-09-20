@@ -1,0 +1,80 @@
+[module service('http://www.eclipse.org/uml2/5.0.0/UML')]
+[import utils::umlHelpers /]
+
+[template public generateService(c : Class)]
+[file ('src/main/java/com/mbrs/framework/service/' + c.name.toUpperFirst() + 'Service.java', false, 'UTF-8')]
+package com.mbrs.framework.service;
+
+import com.mbrs.framework.dto.[c.name.toUpperFirst()/]Dto;
+import java.util.List;
+
+public interface [c.name.toUpperFirst()/]Service {
+    List<[c.name.toUpperFirst()/]Dto> findAll();
+    [c.name.toUpperFirst()/]Dto findById(Long id);
+    [c.name.toUpperFirst()/]Dto create([c.name.toUpperFirst()/]Dto dto);
+    [c.name.toUpperFirst()/]Dto update(Long id, [c.name.toUpperFirst()/]Dto dto);
+    void delete(Long id);
+}
+[/file]
+
+[file ('src/main/java/com/mbrs/framework/service/impl/' + c.name.toUpperFirst() + 'ServiceImpl.java', false, 'UTF-8')]
+package com.mbrs.framework.service.impl;
+
+import com.mbrs.framework.dto.[c.name.toUpperFirst()/]Dto;
+import com.mbrs.framework.entity.[c.name.toUpperFirst()/];
+import com.mbrs.framework.mapper.[c.name.toUpperFirst()/]Mapper;
+import com.mbrs.framework.repository.[c.name.toUpperFirst()/]Repository;
+import com.mbrs.framework.service.[c.name.toUpperFirst()/]Service;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@Transactional
+public class [c.name.toUpperFirst()/]ServiceImpl implements [c.name.toUpperFirst()/]Service {
+
+    private final [c.name.toUpperFirst()/]Repository repository;
+    private final [c.name.toUpperFirst()/]Mapper mapper;
+
+    public [c.name.toUpperFirst()/]ServiceImpl([c.name.toUpperFirst()/]Repository repository, [c.name.toUpperFirst()/]Mapper mapper) {
+        this.repository = repository;
+        this.mapper = mapper;
+    }
+
+    @Override
+    public List<[c.name.toUpperFirst()/]Dto> findAll() {
+        return repository.findAll().stream()
+                .map(mapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public [c.name.toUpperFirst()/]Dto findById(Long id) {
+        return repository.findById(id)
+                .map(mapper::toDto)
+                .orElseThrow(() -> new RuntimeException("[c.name.toUpperFirst()/] not found"));
+    }
+
+    @Override
+    public [c.name.toUpperFirst()/]Dto create([c.name.toUpperFirst()/]Dto dto) {
+        [c.name.toUpperFirst()/] entity = mapper.toEntity(dto);
+        return mapper.toDto(repository.save(entity));
+    }
+
+    @Override
+    public [c.name.toUpperFirst()/]Dto update(Long id, [c.name.toUpperFirst()/]Dto dto) {
+        [c.name.toUpperFirst()/] entity = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("[c.name.toUpperFirst()/] not found"));
+        mapper.updateEntityFromDto(dto, entity);
+        return mapper.toDto(repository.save(entity));
+    }
+
+    @Override
+    public void delete(Long id) {
+        repository.deleteById(id);
+    }
+}
+[/file]
+[/template]

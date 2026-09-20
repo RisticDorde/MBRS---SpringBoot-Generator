@@ -1,0 +1,16 @@
+[module repository('http://www.eclipse.org/uml2/5.0.0/UML')]
+[import utils::umlHelpers /]
+
+[template public generateRepository(c : Class)]
+[file ('src/main/java/com/mbrs/framework/repository/' + c.name.toUpperFirst() + 'Repository.java', false, 'UTF-8')]
+package com.mbrs.framework.repository;
+
+import com.mbrs.framework.entity.[c.name.toUpperFirst()/];
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface [c.name.toUpperFirst()/]Repository extends JpaRepository<[c.name.toUpperFirst()/], Long> {
+}
+[/file]
+[/template]

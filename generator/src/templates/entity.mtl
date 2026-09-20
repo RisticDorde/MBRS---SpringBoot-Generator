@@ -1,0 +1,25 @@
+[module entity('http://www.eclipse.org/uml2/5.0.0/UML')]
+[import utils::umlHelpers /]
+
+[template public generateEntity(c : Class)]
+[file ('src/main/java/com/mbrs/framework/entity/' + c.name.toUpperFirst() + '.java', false, 'UTF-8')]
+package com.mbrs.framework.entity;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+@Getter
+@Setter
+public class [c.name.toUpperFirst()/] extends BaseEntity {
+
+[for (p : Property | c.ownedAttribute)]
+    [if (not p.type.oclIsUndefined())]
+    private [p.type.name/] [p.name/];
+    [/if]
+[/for]
+
+}
+[/file]
+[/template]

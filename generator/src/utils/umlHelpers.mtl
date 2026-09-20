@@ -1,0 +1,10 @@
+[module umlHelpers('http://www.eclipse.org/uml2/5.0.0/UML')]
+
+[query public hasStereotype(c : Class, name : String) : Boolean = 
+    c.getAppliedStereotypes()->exists(s | s.name = name)
+/]
+
+[query public getTaggedValue(c : Class, stereotypeName : String, propertyName : String) : String = 
+    let s : Stereotype = c.getAppliedStereotypes()->any(s | s.name = stereotypeName) in
+    if (s.oclIsUndefined()) then '' else c.getValue(s, propertyName).oclAsType(String) endif
+/]
