@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:MBRSProfile="http://www.mbrs.com/profile" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML">
+  <uml:Model xmi:id="_model_id" name="SampleModel">
+    <packagedElement xmi:type="uml:Class" xmi:id="_patient_class" name="Patient">
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_patient_name" name="firstName">
+        <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+      </ownedAttribute>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Class" xmi:id="_doctor_class" name="Doctor">
+      <ownedAttribute xmi:type="uml:Property" xmi:id="_doctor_license" name="licenseNumber">
+        <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String"/>
+      </ownedAttribute>
+    </packagedElement>
+    <profileApplication xmi:type="uml:ProfileApplication" xmi:id="_profile_app">
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_profile_ann" source="http://www.eclipse.org/uml2/2.0.0/UML">
+        <references xmi:type="ecore:EPackage" href="../profile/mbrs.profile.uml#_mbrs_profile_annotation_detail"/>
+      </eAnnotations>
+      <appliedProfile xmi:type="uml:Profile" href="../profile/mbrs.profile.uml#_mbrs_profile"/>
+    </profileApplication>
+  </uml:Model>
+  
+  <MBRSProfile:Entity xmi:id="_entity_patient" base_Class="_patient_class"/>
+  <MBRSProfile:Attribute xmi:id="_attr_patient_name" base_Property="_patient_name" nullable="false" length="50"/>
+  
+  <MBRSProfile:Entity xmi:id="_entity_doctor" base_Class="_doctor_class"/>
+</xmi:XMI>

@@ -49,3 +49,9 @@ buildNumber.properties
 
 # Mac
 .DS_Store
+
+examples/out1/
+
+
+generator/src/Generate.java
+

@@ -1,17 +1,14 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Generator Module
+Bundle-Name: generator
 Bundle-SymbolicName: generator;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore,
  org.eclipse.emf.ecore.xmi,
  org.eclipse.ocl,
  org.eclipse.ocl.ecore,
- org.eclipse.acceleo.model,
  org.eclipse.acceleo.engine,
  org.eclipse.uml2.uml,
- org.eclipse.uml2.types
-Bundle-ActivationPolicy: lazy
-Eclipse-LazyStart: true
+ org.eclipse.uml2.types,
+ org.eclipse.uml2.uml.resources
