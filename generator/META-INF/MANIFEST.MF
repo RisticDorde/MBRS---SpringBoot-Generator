@@ -12,3 +12,4 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.uml2.uml,
  org.eclipse.uml2.types,
  org.eclipse.uml2.uml.resources
+Export-Package: generate, templates, utils

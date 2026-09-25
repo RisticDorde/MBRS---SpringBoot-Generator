@@ -8,13 +8,36 @@ package com.mbrs.framework.mapper;
 import com.mbrs.framework.dto.[c.name.toUpperFirst()/]Dto;
 import com.mbrs.framework.entity.[c.name.toUpperFirst()/];
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface [c.name.toUpperFirst()/]Mapper {
 
+[for (p : Property | c.ownedAttribute)]
+    [if (not p.association.oclIsUndefined())]
+        [if (p.association.hasStereotype('Relation'))]
+            [if (not p.isMany())]
+    @Mapping(source = "[p.name/].id", target = "[p.name/]Id")
+            [else]
+    @Mapping(target = "[p.name/]Ids", ignore = true)
+            [/if]
+        [/if]
+    [/if]
+[/for]
     [c.name.toUpperFirst()/]Dto toDto([c.name.toUpperFirst()/] entity);
     
+[for (p : Property | c.ownedAttribute)]
+    [if (not p.association.oclIsUndefined())]
+        [if (p.association.hasStereotype('Relation'))]
+            [if (not p.isMany())]
+    @Mapping(source = "[p.name/]Id", target = "[p.name/].id")
+            [else]
+    @Mapping(target = "[p.name/]", ignore = true)
+            [/if]
+        [/if]
+    [/if]
+[/for]
     [c.name.toUpperFirst()/] toEntity([c.name.toUpperFirst()/]Dto dto);
     
     void updateEntityFromDto([c.name.toUpperFirst()/]Dto dto, @MappingTarget [c.name.toUpperFirst()/] entity);

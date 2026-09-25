@@ -8,6 +8,7 @@ package com.mbrs.framework.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import java.util.List;
 
 @Entity
 @Getter
@@ -16,7 +17,51 @@ public class [c.name.toUpperFirst()/] extends BaseEntity {
 
 [for (p : Property | c.ownedAttribute)]
     [if (not p.type.oclIsUndefined())]
+        [if (not p.association.oclIsUndefined())]
+            [let a : Association = p.association]
+                [if (a.hasStereotype('Relation'))]
+                    [let cascade : String = a.getTaggedValue('Relation', 'cascade')]
+                    [let fetch : String = a.getTaggedValue('Relation', 'fetch')]
+                    [let cascadeAttr : String = if cascade <> '' then 'cascade = CascadeType.' + cascade else '' endif]
+                    [let fetchAttr : String = if fetch <> '' then 'fetch = FetchType.' + fetch else '' endif]
+                    [let attrsStr : String = if cascadeAttr <> '' and fetchAttr <> '' then cascadeAttr + ', ' + fetchAttr else cascadeAttr + fetchAttr endif]
+                    [let commaAttrs : String = if attrsStr <> '' then ', ' + attrsStr else '' endif]
+                    [let bareAttrs : String = if attrsStr <> '' then '(' + attrsStr + ')' else '' endif]
+                    
+                    [if (p.isManyToOne())]
+    @ManyToOne[bareAttrs/]
+    @JoinColumn(name = "[p.name.toLower()/]_id")
+    private [p.type.name.toUpperFirst()/] [p.name/];
+                    [/if]
+                    [if (p.isOneToMany())]
+    @OneToMany(mappedBy = "[p.getOtherEnd().name/]"[commaAttrs/])
+    private List<[p.type.name.toUpperFirst()/]> [p.name/];
+                    [/if]
+                    [if (p.isManyToMany())]
+    @ManyToMany[bareAttrs/]
+    private List<[p.type.name.toUpperFirst()/]> [p.name/];
+                    [/if]
+                    [if (p.isOneToOne())]
+    @OneToOne[bareAttrs/]
+    @JoinColumn(name = "[p.name.toLower()/]_id")
+    private [p.type.name.toUpperFirst()/] [p.name/];
+                    [/if]
+                    [/let]
+                    [/let]
+                    [/let]
+                    [/let]
+                    [/let]
+                    [/let]
+                    [/let]
+                [else]
+    // Unstereotyped association
+    private [if (p.isMany())]List<[p.type.name.toUpperFirst()/]>[else][p.type.name.toUpperFirst()/][/if] [p.name/];
+                [/if]
+            [/let]
+        [else]
+    // Regular attribute
     private [p.type.name/] [p.name/];
+        [/if]
     [/if]
 [/for]
 

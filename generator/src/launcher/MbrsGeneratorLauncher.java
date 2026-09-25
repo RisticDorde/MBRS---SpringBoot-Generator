@@ -12,13 +12,13 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 
-public class Generate extends AbstractAcceleoGenerator {
+public class MbrsGeneratorLauncher extends AbstractAcceleoGenerator {
     
-    public Generate(URI modelURI, File targetFolder, List<? extends Object> arguments) throws IOException {
+    public MbrsGeneratorLauncher(URI modelURI, File targetFolder, List<? extends Object> arguments) throws IOException {
         initialize(modelURI, targetFolder, arguments);
     }
 
-    public Generate(EObject model, File targetFolder, List<? extends Object> arguments) throws IOException {
+    public MbrsGeneratorLauncher(EObject model, File targetFolder, List<? extends Object> arguments) throws IOException {
         initialize(model, targetFolder, arguments);
     }
     
@@ -38,14 +38,14 @@ public class Generate extends AbstractAcceleoGenerator {
 
     @Override
     public String getModuleName() {
-        return "/generate";
+        return "/generate/generate";
     }
     
     @Override
     protected java.net.URL findModuleURL(String moduleName) {
         try {
-            java.io.File emtl = new java.io.File("bin/generate.emtl");
-            if (!emtl.exists()) emtl = new java.io.File("../bin/generate.emtl");
+            java.io.File emtl = new java.io.File("bin/generate/generate.emtl");
+            if (!emtl.exists()) emtl = new java.io.File("../bin/generate/generate.emtl");
             if (emtl.exists()) {
                 System.out.println("DEBUG: Forcefully loaded module from disk: " + emtl.getAbsolutePath());
                 return emtl.toURI().toURL();
@@ -126,8 +126,12 @@ public class Generate extends AbstractAcceleoGenerator {
                 for (int i = 2; i < args.length; i++) {
                     arguments.add(args[i]);
                 }
-                Generate generator = new Generate(modelURI, folder, arguments);
+                MbrsGeneratorLauncher generator = new MbrsGeneratorLauncher(modelURI, folder, arguments);
                 generator.doGenerate(new BasicMonitor());
+                
+                System.out.println("=====================================================");
+                System.out.println("SUCCESS: Generation completed! Check output at: " + folder.getAbsolutePath());
+                System.out.println("=====================================================");
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -7,6 +7,7 @@ package com.mbrs.framework.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+import java.util.List;
 
 @Getter
 @Setter
@@ -16,7 +17,19 @@ public class [c.name.toUpperFirst()/]Dto {
 
 [for (p : Property | c.ownedAttribute)]
     [if (not p.type.oclIsUndefined())]
+        [if (not p.association.oclIsUndefined())]
+            [if (p.association.hasStereotype('Relation'))]
+                [if (p.isMany())]
+    private List<Long> [p.name/]Ids;
+                [else]
+    private Long [p.name/]Id;
+                [/if]
+            [else]
     private [p.type.name/] [p.name/];
+            [/if]
+        [else]
+    private [p.type.name/] [p.name/];
+        [/if]
     [/if]
 [/for]
 

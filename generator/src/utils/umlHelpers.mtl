@@ -1,10 +1,49 @@
 [module umlHelpers('http://www.eclipse.org/uml2/5.0.0/UML')]
 
-[query public hasStereotype(c : Class, name : String) : Boolean = 
-    c.getAppliedStereotypes()->exists(s | s.name = name)
+[query public hasStereotype(e : Element, name : String) : Boolean = 
+    e.getAppliedStereotypes()->exists(s | s.name = name)
 /]
 
-[query public getTaggedValue(c : Class, stereotypeName : String, propertyName : String) : String = 
-    let s : Stereotype = c.getAppliedStereotypes()->any(s | s.name = stereotypeName) in
-    if (s.oclIsUndefined()) then '' else c.getValue(s, propertyName).oclAsType(String) endif
+[query public getTaggedValue(e : Element, stereotypeName : String, propertyName : String) : String = 
+    let s : Stereotype = e.getAppliedStereotypes()->any(st | st.name = stereotypeName) in
+    if (s.oclIsUndefined()) then '' 
+    else 
+        let v : OclAny = e.getValue(s, propertyName) in
+        if (v.oclIsUndefined()) then '' 
+        else v.toString() 
+        endif
+    endif
+/]
+
+[query public isMany(p : Property) : Boolean = 
+    p.upper = -1 or p.upper > 1
+/]
+
+[query public isOne(p : Property) : Boolean = 
+    p.upper = 1
+/]
+
+[query public getOtherEnd(p : Property) : Property = 
+    if p.association.oclIsUndefined() then null 
+    else p.association.memberEnd->select(e | e <> p)->first() endif
+/]
+
+[query public isOneToMany(p : Property) : Boolean = 
+    let other : Property = p.getOtherEnd() in
+    if other.oclIsUndefined() then false else p.isMany() and other.isOne() endif
+/]
+
+[query public isManyToOne(p : Property) : Boolean = 
+    let other : Property = p.getOtherEnd() in
+    if other.oclIsUndefined() then false else p.isOne() and other.isMany() endif
+/]
+
+[query public isManyToMany(p : Property) : Boolean = 
+    let other : Property = p.getOtherEnd() in
+    if other.oclIsUndefined() then false else p.isMany() and other.isMany() endif
+/]
+
+[query public isOneToOne(p : Property) : Boolean = 
+    let other : Property = p.getOtherEnd() in
+    if other.oclIsUndefined() then false else p.isOne() and other.isOne() endif
 /]

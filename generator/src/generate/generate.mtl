@@ -1,4 +1,4 @@
-[module generate('http://www.eclipse.org/uml2/5.0.0/UML')]
+[module generate::generate('http://www.eclipse.org/uml2/5.0.0/UML')]
 [import utils::umlHelpers /]
 [import templates::entity /]
 [import templates::repository /]
@@ -9,6 +9,7 @@
 
 [template public generateAll(model : Model)]
 [comment @main/]
+
 [for (c : Class | model.eAllContents(Class))]
     [if (c.hasStereotype('Entity'))]
         [c.generateEntity()/]
