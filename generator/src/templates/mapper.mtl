@@ -11,7 +11,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {ReferenceMapper.class})
 public interface [c.name.toUpperFirst()/]Mapper {
 
 [for (p : Property | c.ownedAttribute)]
@@ -31,7 +31,7 @@ public interface [c.name.toUpperFirst()/]Mapper {
     [if (not p.association.oclIsUndefined())]
         [if (p.association.hasStereotype('Relation'))]
             [if (not p.isMany())]
-    @Mapping(source = "[p.name/]Id", target = "[p.name/].id")
+    @Mapping(source = "[p.name/]Id", target = "[p.name/]")
             [else]
     @Mapping(target = "[p.name/]", ignore = true)
             [/if]
@@ -40,7 +40,20 @@ public interface [c.name.toUpperFirst()/]Mapper {
 [/for]
     [c.name.toUpperFirst()/] toEntity([c.name.toUpperFirst()/]Dto dto);
     
+[for (p : Property | c.ownedAttribute)]
+    [if (not p.association.oclIsUndefined())]
+        [if (p.association.hasStereotype('Relation'))]
+            [if (not p.isMany())]
+    @Mapping(source = "[p.name/]Id", target = "[p.name/]")
+            [else]
+    @Mapping(target = "[p.name/]", ignore = true)
+            [/if]
+        [/if]
+    [/if]
+[/for]
+    @Mapping(target = "id", ignore = true)
     void updateEntityFromDto([c.name.toUpperFirst()/]Dto dto, @MappingTarget [c.name.toUpperFirst()/] entity);
 }
 [/file]
 [/template]
+

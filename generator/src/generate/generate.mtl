@@ -6,9 +6,12 @@
 [import templates::mapper /]
 [import templates::service /]
 [import templates::controller /]
+[import templates::frontend /]
 
 [template public generateAll(model : Model)]
 [comment @main/]
+
+[model.generateFrontend()/]
 
 [for (c : Class | model.eAllContents(Class))]
     [if (c.hasStereotype('Entity'))]

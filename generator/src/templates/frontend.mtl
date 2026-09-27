@@ -1,0 +1,357 @@
+[module frontend('http://www.eclipse.org/uml2/5.0.0/UML')]
+[import utils::umlHelpers /]
+
+[template public generateFrontend(model : Model)]
+
+[file ('src/main/resources/static/style.css', false, 'UTF-8')]
+body {
+    background-color: #f8f9fa;
+}
+.entity-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+.navbar-brand {
+    font-weight: bold;
+}
+[/file]
+
+[file ('src/main/resources/static/index.html', false, 'UTF-8')]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MBRS Application</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">MBRS App</a>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+        [for (c : Class | model.eAllContents(Class))]
+            [if (c.hasStereotype('Entity'))]
+            <li class="nav-item">
+              <a class="nav-link" href="#" onclick="showSection('[c.name/]Section')">[c.name/]</a>
+            </li>
+            [/if]
+        [/for]
+      </ul>
+    </div>
+  </div>
+</nav>
+<div class="container mt-4">
+    <div id="welcomeSection" class="entity-section">
+        <h2>Welcome to MBRS App</h2>
+        <p>Select an entity from the menu to manage records.</p>
+    </div>
+
+    [for (c : Class | model.eAllContents(Class))]
+        [if (c.hasStereotype('Entity'))]
+        <div id="[c.name/]Section" class="entity-section" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2>Manage [c.name/]</h2>
+                <button class="btn btn-primary" onclick="showCreateForm_[c.name/]()">Add New [c.name/]</button>
+            </div>
+            <table class="table table-striped table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        [for (p : Property | c.ownedAttribute)]
+                            [if (not p.type.oclIsUndefined() and p.association.oclIsUndefined())]
+                        <th>[p.name.toUpperFirst()/]</th>
+                            [/if]
+                        [/for]
+                        [for (p : Property | c.ownedAttribute)]
+                            [if (not p.association.oclIsUndefined())]
+                        <th>[p.name.toUpperFirst()/]</th>
+                            [/if]
+                        [/for]
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody_[c.name/]">
+                </tbody>
+            </table>
+        </div>
+        [/if]
+    [/for]
+</div>
+
+[for (c : Class | model.eAllContents(Class))]
+    [if (c.hasStereotype('Entity'))]
+<div class="modal fade" id="modal_[c.name/]" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle_[c.name/]">Add [c.name/]</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="form_[c.name/]">
+            <input type="hidden" id="input_[c.name/]_id">
+            [for (p : Property | c.ownedAttribute)]
+                [if (not p.type.oclIsUndefined() and p.association.oclIsUndefined())]
+            <div class="mb-3">
+                <label class="form-label">[p.name.toUpperFirst()/]</label>
+                <input type="[if (p.type.name = 'Integer' or p.type.name = 'Long')]number[else]text[/if]" class="form-control" id="input_[c.name/]_[p.name/]" required>
+            </div>
+                [/if]
+            [/for]
+            [for (p : Property | c.ownedAttribute)]
+                [if (not p.association.oclIsUndefined())]
+                    [let a : Association = p.association]
+                        [if (a.hasStereotype('Relation'))]
+                            [if (p.isMany())]
+            <div class="mb-3">
+                <label class="form-label">[p.name.toUpperFirst()/]</label>
+                <select multiple class="form-control" id="input_[c.name/]_[p.name/]"></select>
+            </div>
+                            [else]
+            <div class="mb-3">
+                <label class="form-label">[p.name.toUpperFirst()/]</label>
+                <select class="form-control" id="input_[c.name/]_[p.name/]">
+                    <option value="">-- Select --</option>
+                </select>
+            </div>
+                            [/if]
+                        [/if]
+                    [/let]
+                [/if]
+            [/for]
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="save_[c.name/]()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+    [/if]
+[/for]
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
+[/file]
+
+[file ('src/main/resources/static/app.js', false, 'UTF-8')]
+const API_BASE = '/api';
+
+function showSection(sectionId) {
+    document.querySelectorAll('.entity-section').forEach(sec => sec.style.display = 'none');
+    document.getElementById(sectionId).style.display = 'block';
+    
+    [for (c : Class | model.eAllContents(Class))]
+        [if (c.hasStereotype('Entity'))]
+    if (sectionId === '[c.name/]Section') {
+        fetch_[c.name/]();
+    }
+        [/if]
+    [/for]
+}
+
+[for (c : Class | model.eAllContents(Class))]
+    [if (c.hasStereotype('Entity'))]
+let current[c.name/]Id = null;
+let modal[c.name/] = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+    modal[c.name/] = new bootstrap.Modal(document.getElementById('modal_[c.name/]'));
+});
+
+// Dropdown populators for [c.name/]
+[for (p : Property | c.ownedAttribute)]
+    [if (not p.association.oclIsUndefined())]
+        [let a : Association = p.association]
+            [if (a.hasStereotype('Relation'))]
+function populate_[c.name/]_[p.name/](selectedValues) {
+    fetch(`${API_BASE}/[p.type.name.toLower()/]s`)
+        .then(res => res.json())
+        .then(data => {
+            const select = document.getElementById('input_[c.name/]_[p.name/]');
+            select.innerHTML = '';
+            [if (not p.isMany())]
+            select.innerHTML = '<option value="">-- Select --</option>';
+            [/if]
+            data.forEach(item => {
+                let option = document.createElement('option');
+                option.value = item.id;
+                let detailsArr = new Array();
+                for (let k in item) {
+                    let val = item['['/]k[']'/];
+                    if (k !== 'id' && val !== null && typeof val !== 'object') {
+                        detailsArr.push(val);
+                    }
+                }
+                option.text = `ID: ${item.id} - ` + detailsArr.join(' | ');
+                
+                [if (p.isMany())]
+                if (selectedValues && selectedValues.includes(item.id)) option.selected = true;
+                [else]
+                if (selectedValues && selectedValues == item.id) option.selected = true;
+                [/if]
+                select.appendChild(option);
+            });
+        });
+}
+            [/if]
+        [/let]
+    [/if]
+[/for]
+
+function fetch_[c.name/]() {
+    fetch(`${API_BASE}/[c.name.toLower()/]s`)
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.getElementById('tbody_[c.name/]');
+            tbody.innerHTML = '';
+            data.forEach(item => {
+                let tr = document.createElement('tr');
+                let html = `<td>${item.id}</td>`;
+                
+                [for (p : Property | c.ownedAttribute)]
+                    [if (not p.type.oclIsUndefined() and p.association.oclIsUndefined())]
+                html += `<td>${item.[p.name/] !== null ? item.[p.name/] : ''}</td>`;
+                    [/if]
+                [/for]
+                [for (p : Property | c.ownedAttribute)]
+                    [if (not p.association.oclIsUndefined())]
+                        [let a : Association = p.association]
+                            [if (a.hasStereotype('Relation'))]
+                                [if (p.isMany())]
+                html += `<td>${item.[p.name/]Ids ? item.[p.name/]Ids.join(', ') : ''}</td>`;
+                                [else]
+                html += `<td>${item.[p.name/]Id !== null ? item.[p.name/]Id : ''}</td>`;
+                                [/if]
+                            [/if]
+                        [/let]
+                    [/if]
+                [/for]
+                
+                html += `
+                    <td>
+                        <button class="btn btn-sm btn-warning" onclick="edit_[c.name/](${item.id})">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="delete_[c.name/](${item.id})">Delete</button>
+                    </td>
+                `;
+                tr.innerHTML = html;
+                tbody.appendChild(tr);
+            });
+        })
+        .catch(err => console.error('Error fetching [c.name/]:', err));
+}
+
+function showCreateForm_[c.name/]() {
+    current[c.name/]Id = null;
+    document.getElementById('form_[c.name/]').reset();
+    document.getElementById('modalTitle_[c.name/]').innerText = 'Add [c.name/]';
+    
+    [for (p : Property | c.ownedAttribute)]
+        [if (not p.association.oclIsUndefined() and p.association.hasStereotype('Relation'))]
+    populate_[c.name/]_[p.name/](null);
+        [/if]
+    [/for]
+    
+    modal[c.name/].show();
+}
+
+function edit_[c.name/](id) {
+    current[c.name/]Id = id;
+    fetch(`${API_BASE}/[c.name.toLower()/]s/${id}`)
+        .then(res => res.json())
+        .then(item => {
+            document.getElementById('input_[c.name/]_id').value = item.id;
+            [for (p : Property | c.ownedAttribute)]
+                [if (not p.type.oclIsUndefined() and p.association.oclIsUndefined())]
+            document.getElementById('input_[c.name/]_[p.name/]').value = item.[p.name/] !== null ? item.[p.name/] : '';
+                [/if]
+            [/for]
+            [for (p : Property | c.ownedAttribute)]
+                [if (not p.association.oclIsUndefined())]
+                    [let a : Association = p.association]
+                        [if (a.hasStereotype('Relation'))]
+                            [if (p.isMany())]
+            populate_[c.name/]_[p.name/](item.[p.name/]Ids || new Array());
+                            [else]
+            populate_[c.name/]_[p.name/](item.[p.name/]Id);
+                            [/if]
+                        [/if]
+                    [/let]
+                [/if]
+            [/for]
+            
+            document.getElementById('modalTitle_[c.name/]').innerText = 'Edit [c.name/]';
+            modal[c.name/].show();
+        })
+        .catch(err => console.error('Error fetching [c.name/] for edit:', err));
+}
+
+function save_[c.name/]() {
+    const payload = {
+        [for (p : Property | c.ownedAttribute)]
+            [if (not p.type.oclIsUndefined() and p.association.oclIsUndefined())]
+        [p.name/]: document.getElementById('input_[c.name/]_[p.name/]').value,
+            [/if]
+        [/for]
+        [for (p : Property | c.ownedAttribute)]
+            [if (not p.association.oclIsUndefined())]
+                [let a : Association = p.association]
+                    [if (a.hasStereotype('Relation'))]
+                        [if (p.isMany())]
+        [p.name/]Ids: Array.from(document.getElementById('input_[c.name/]_[p.name/]').selectedOptions).map(opt => parseInt(opt.value)),
+                        [else]
+        [p.name/]Id: document.getElementById('input_[c.name/]_[p.name/]').value ? parseInt(document.getElementById('input_[c.name/]_[p.name/]').value) : null,
+                        [/if]
+                    [/if]
+                [/let]
+            [/if]
+        [/for]
+    };
+    
+    const method = current[c.name/]Id ? 'PUT' : 'POST';
+    const url = current[c.name/]Id ? `${API_BASE}/[c.name.toLower()/]s/${current[c.name/]Id}` : `${API_BASE}/[c.name.toLower()/]s`;
+    
+    fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(res => {
+        if(res.ok) {
+            modal[c.name/].hide();
+            fetch_[c.name/]();
+        } else {
+            alert('Error saving [c.name/]');
+        }
+    })
+    .catch(err => console.error('Error saving [c.name/]:', err));
+}
+
+function delete_[c.name/](id) {
+    if(confirm('Are you sure you want to delete this [c.name/]?')) {
+        fetch(`${API_BASE}/[c.name.toLower()/]s/${id}`, {
+            method: 'DELETE'
+        })
+        .then(res => {
+            if(res.ok) {
+                fetch_[c.name/]();
+            } else {
+                alert('Error deleting [c.name/]');
+            }
+        })
+        .catch(err => console.error('Error deleting [c.name/]:', err));
+    }
+}
+    [/if]
+[/for]
+[/file]
+
+[/template]
+
